@@ -55,7 +55,8 @@ fn replace_numbers(line: &str) -> String {
 }
 
 fn part2(puzzle: &[String]) -> u32 {
-    let translated: Vec<_> = puzzle.iter().map(|s| replace_numbers(s)).collect();
+    let translated: Vec<_> =
+        puzzle.iter().map(|s| replace_numbers(s)).collect();
 
     part1(&translated)
 }
