@@ -95,14 +95,7 @@ fn part1(mut hands: Vec<([Card; 5], usize)>) -> usize {
         let type_right = card_type(right);
 
         if type_left == type_right {
-            for (left, right) in left.iter().zip(right.iter()) {
-                let ord = left.cmp(right);
-                if ord != Ordering::Equal {
-                    return ord;
-                }
-            }
-
-            Ordering::Equal
+            left.cmp(right)
         } else {
             type_left.cmp(&type_right)
         }
