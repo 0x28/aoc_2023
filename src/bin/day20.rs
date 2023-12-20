@@ -194,10 +194,10 @@ fn part2(modules: &AHashMap<&str, Module>) -> i64 {
         env::temp_dir().to_str().unwrap()
     );
 
-    // Solved by looking a the graph (after translating it to graphviz).
-    // There are four conjunctions with more than one input in the graph. Every
-    // input of every conjunction module needs to be 1 (high). The conjunctions
-    // are connected to a sequence of flip-flops, this is essentially a counting
+    // Solved by looking at the graph (after translating it to graphviz). There
+    // are four conjunctions with more than one input in the graph. Every input
+    // of every conjunction module needs to be 1 (high). The conjunctions are
+    // connected to a sequence of flip-flops, this is essentially a counting
     // register.
 
     // If the flip-flop of a counting register is connected back to the
