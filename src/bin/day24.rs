@@ -1,4 +1,6 @@
 use std::ops::RangeInclusive;
+use z3::ast::{Ast, Int, Real};
+use z3::{Config, Context, Solver};
 
 #[derive(Debug)]
 struct Hail {
@@ -51,7 +53,7 @@ fn intersection(left: &Hail, right: &Hail) -> Option<Point> {
     Some((x, y))
 }
 
-fn part1(puzzle: &Vec<Hail>, bounds: RangeInclusive<f64>) -> i64 {
+fn part1(puzzle: &[Hail], bounds: RangeInclusive<f64>) -> i64 {
     let mut crossings = 0;
 
     for (left, lhail) in puzzle.iter().enumerate() {
@@ -77,8 +79,56 @@ fn part1(puzzle: &Vec<Hail>, bounds: RangeInclusive<f64>) -> i64 {
     crossings
 }
 
-fn part2(puzzle: &Vec<Hail>) -> i64 {
-    todo!()
+fn part2(puzzle: &[Hail]) -> i64 {
+    let cfg = Config::new();
+    let ctx = Context::new(&cfg);
+    let solver = Solver::new(&ctx);
+    let x = Real::new_const(&ctx, "X");
+    let y = Real::new_const(&ctx, "Y");
+    let z = Real::new_const(&ctx, "Z");
+
+    let vx = Real::new_const(&ctx, "VX");
+    let vy = Real::new_const(&ctx, "VY");
+    let vz = Real::new_const(&ctx, "VZ");
+
+    // z3 is really cool :)
+    for stone in puzzle.iter() {
+        // real is much faster than int
+        let x_other = Int::from_i64(&ctx, stone.x as i64).to_real();
+        let y_other = Int::from_i64(&ctx, stone.y as i64).to_real();
+        let z_other = Int::from_i64(&ctx, stone.z as i64).to_real();
+        let tn = Real::fresh_const(&ctx, "T");
+
+        let vx_other = Int::from_i64(&ctx, stone.vx as i64).to_real();
+        let vy_other = Int::from_i64(&ctx, stone.vy as i64).to_real();
+        let vz_other = Int::from_i64(&ctx, stone.vz as i64).to_real();
+
+        let stone_move_x = &x + &vx * &tn;
+        let stone_move_y = &y + &vy * &tn;
+        let stone_move_z = &z + &vz * &tn;
+
+        let other_move_x = &x_other + &vx_other * &tn;
+        let other_move_y = &y_other + &vy_other * &tn;
+        let other_move_z = &z_other + &vz_other * &tn;
+
+        solver.assert(&stone_move_x._eq(&other_move_x));
+        solver.assert(&stone_move_y._eq(&other_move_y));
+        solver.assert(&stone_move_z._eq(&other_move_z));
+    }
+
+    solver.check();
+    let model = solver.get_model().unwrap();
+
+    if let (Some(x), Some(y), Some(z)) = (
+        model.get_const_interp(&x).and_then(|x| x.as_real()),
+        model.get_const_interp(&y).and_then(|y| y.as_real()),
+        model.get_const_interp(&z).and_then(|z| z.as_real()),
+    ) {
+        assert!(x.1 == 1 && y.1 == 1 && z.1 == 1);
+        x.0 + y.0 + z.0
+    } else {
+        unreachable!()
+    }
 }
 
 fn main() {
@@ -88,7 +138,7 @@ fn main() {
         "part1 = {}",
         part1(&input, 200000000000000.0..=400000000000000.0)
     );
-    // println!("part2 = {}", part2(&input));
+    println!("part2 = {}", part2(&input));
 }
 
 #[test]
@@ -102,5 +152,5 @@ fn test_day24() {
     let input = parse(input);
 
     assert_eq!(part1(&input, 7.0..=27.0), 2);
-    // assert_eq!(part2(&input), 0);
+    assert_eq!(part2(&input), 47);
 }
