@@ -94,14 +94,14 @@ fn part2(puzzle: &[Pattern]) -> i64 {
                         .find(|&&m| Some(m) != hori_dirt)
                         .copied();
 
-                    let hori_vert = vertical_mirrors(&cleaned)
+                    let vert_clean = vertical_mirrors(&cleaned)
                         .iter()
                         .find(|&&m| Some(m) != vert_dirt)
                         .copied();
 
-                    if hori_vert.is_some() || hori_clean.is_some() {
+                    if vert_clean.is_some() || hori_clean.is_some() {
                         return hori_clean.unwrap_or_default()
-                            + 100 * hori_vert.unwrap_or_default();
+                            + 100 * vert_clean.unwrap_or_default();
                     }
 
                     toggle_tile(&mut cleaned, y, x)
